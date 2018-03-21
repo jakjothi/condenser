@@ -22,6 +22,7 @@ class Modals extends React.Component {
         show_confirm_modal: React.PropTypes.bool,
         show_transfer_modal: React.PropTypes.bool,
         show_powerdown_modal: React.PropTypes.bool,
+        show_bandwidth_error_modal: React.PropTypes.bool,
         show_signup_modal: React.PropTypes.bool,
         show_promote_post_modal: React.PropTypes.bool,
         hideLogin: React.PropTypes.func.isRequired,
@@ -30,6 +31,7 @@ class Modals extends React.Component {
         hideTransfer: React.PropTypes.func.isRequired,
         hidePowerdown: React.PropTypes.func.isRequired,
         hidePromotePost: React.PropTypes.func.isRequired,
+        hideBandwidthError: React.PropTypes.func.isRequired,
         notifications: React.PropTypes.object,
         show_terms_modal: React.PropTypes.bool,
         removeNotification: React.PropTypes.func,
@@ -47,6 +49,7 @@ class Modals extends React.Component {
             show_transfer_modal,
             show_powerdown_modal,
             show_signup_modal,
+            show_bandwidth_error_modal,
             hideLogin,
             hideTransfer,
             hidePowerdown,
@@ -57,6 +60,7 @@ class Modals extends React.Component {
             removeNotification,
             hidePromotePost,
             show_promote_post_modal,
+            hideBandwidthError,
         } = this.props;
 
         const notifications_array = notifications
@@ -102,6 +106,15 @@ class Modals extends React.Component {
                         <TermsAgree onCancel={hideLogin} />
                     </Reveal>
                 )}
+                {show_bandwidth_error_modal && (
+                    <Reveal
+                        onHide={hideBandwidthError}
+                        show={show_bandwidth_error_modal}
+                    >
+                        <CloseButton onClick={hideBandwidthError} />
+                        <h1>HELLO WORLD</h1>
+                    </Reveal>
+                )}
                 <NotificationStack
                     style={false}
                     notifications={notifications_array}
@@ -123,6 +136,10 @@ export default connect(
             show_signup_modal: state.user.get('show_signup_modal'),
             notifications: state.app.get('notifications'),
             show_terms_modal: state.user.get('show_terms_modal'),
+            show_bandwidth_error_modal: state.transaction.getIn([
+                'errors',
+                'bandwidthError',
+            ]),
         };
     },
     dispatch => ({
@@ -149,6 +166,12 @@ export default connect(
         hideSignUp: e => {
             if (e) e.preventDefault();
             dispatch(userActions.hideSignUp());
+        },
+        hideBandwidthError: e => {
+            if (e) e.preventDefault();
+            dispatch(
+                transactionActions.dismissError({ key: 'bandwidthError' })
+            );
         },
         // example: addNotification: ({key, message}) => dispatch({type: 'ADD_NOTIFICATION', payload: {key, message}}),
         removeNotification: key =>
