@@ -13,7 +13,6 @@ const SET = 'transaction/SET';
 const REMOVE = 'transaction/REMOVE';
 // Saga-related
 export const RECOVER_ACCOUNT = 'transaction/RECOVER_ACCOUNT';
-
 const defaultState = fromJS({
     operations: [],
     status: { key: '', error: false, busy: false },

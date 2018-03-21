@@ -169,6 +169,9 @@ export default reduxForm(
                             })
                         );
                     },
+                    errorCallback: () => {
+                        error();
+                    },
                 })
             );
         },
