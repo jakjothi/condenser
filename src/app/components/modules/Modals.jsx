@@ -4,7 +4,7 @@ import CloseButton from 'react-foundation-components/lib/global/close-button';
 import Reveal from 'react-foundation-components/lib/global/reveal';
 import { NotificationStack } from 'react-notification';
 import { OrderedSet } from 'immutable';
-
+import tt from 'counterpart';
 import * as userActions from 'app/redux/UserReducer';
 import * as appActions from 'app/redux/AppReducer';
 import * as transactionActions from 'app/redux/TransactionReducer';
@@ -17,6 +17,19 @@ import shouldComponentUpdate from 'app/utils/shouldComponentUpdate';
 import TermsAgree from 'app/components/modules/TermsAgree';
 
 class Modals extends React.Component {
+    static defaultProps = {
+        username: '',
+        notifications: undefined,
+        removeNotification: () => {},
+        show_terms_modal: false,
+        show_promote_post_modal: false,
+        show_signup_modal: false,
+        show_bandwidth_error_modal: false,
+        show_powerdown_modal: false,
+        show_transfer_modal: false,
+        show_confirm_modal: false,
+        show_login_modal: false,
+    };
     static propTypes = {
         show_login_modal: React.PropTypes.bool,
         show_confirm_modal: React.PropTypes.bool,
@@ -26,6 +39,7 @@ class Modals extends React.Component {
         show_signup_modal: React.PropTypes.bool,
         show_promote_post_modal: React.PropTypes.bool,
         hideLogin: React.PropTypes.func.isRequired,
+        username: React.PropTypes.string,
         hideConfirm: React.PropTypes.func.isRequired,
         hideSignUp: React.PropTypes.func.isRequired,
         hideTransfer: React.PropTypes.func.isRequired,
@@ -61,6 +75,7 @@ class Modals extends React.Component {
             hidePromotePost,
             show_promote_post_modal,
             hideBandwidthError,
+            username,
         } = this.props;
 
         const notifications_array = notifications
@@ -69,6 +84,15 @@ class Modals extends React.Component {
                   return n;
               })
             : [];
+
+        const buySteemPower = e => {
+            if (e && e.preventDefault) e.preventDefault();
+            const new_window = window.open();
+            new_window.opener = null;
+            new_window.location =
+                'https://blocktrades.us/?input_coin_type=eth&output_coin_type=steem&receive_address=' +
+                username;
+        };
 
         return (
             <div>
@@ -111,8 +135,35 @@ class Modals extends React.Component {
                         onHide={hideBandwidthError}
                         show={show_bandwidth_error_modal}
                     >
-                        <CloseButton onClick={hideBandwidthError} />
-                        <h1>HELLO WORLD</h1>
+                        <div>
+                            <CloseButton onClick={hideBandwidthError} />
+                            <h4>Your transaction failed to process</h4>
+                            <hr />
+                            <h5> Why? You've run out of bandwidth </h5>
+                            <p>
+                                Actions such as posting and voting use computing
+                                resources placing a real cost on the community
+                                members who run the Steem blockchain for
+                                everyone.
+                            </p>
+                            <p>
+                                To keep things free, Steem intelligently
+                                allocates bandwidth to each user based on their
+                                Steem Power holdings, their recent usage and
+                                overall network demand. This system prioritizes
+                                actions by good community members while limiting
+                                spam.
+                            </p>
+                            <p>To keep interacting on Steemit:</p>
+                            <ol>
+                                <li>Buy and hold more Steem Power</li>
+                                <li>Wait until your bandwidth recharges</li>
+                                <li>Wait until the network usage decreases</li>
+                            </ol>
+                            <button className="button" onClick={buySteemPower}>
+                                {tt('g.buy_steem_power')}
+                            </button>
+                        </div>
                     </Reveal>
                 )}
                 <NotificationStack
@@ -128,6 +179,7 @@ class Modals extends React.Component {
 export default connect(
     state => {
         return {
+            username: state.user.getIn(['current', 'username']),
             show_login_modal: state.user.get('show_login_modal'),
             show_confirm_modal: state.transaction.get('show_confirm_modal'),
             show_transfer_modal: state.user.get('show_transfer_modal'),
